@@ -31,11 +31,18 @@ dependencies {
     implementation 'org.seleniumhq.selenium:selenium-java:2.41.0'
 // https://mvnrepository.com/artifact/javax.validation/validation-api
     implementation 'javax.validation:validation-api:2.0.1.Final'
+// https://mvnrepository.com/artifact/org.hibernate.validator/hibernate-validator
+    implementation 'org.hibernate.validator:hibernate-validator:6.2.0.Final'
+    implementation 'org.springframework.boot:spring-boot-starter-jdbc'
+    // https://mvnrepository.com/artifact/com.h2database/h2
+    implementation 'com.h2database:h2:1.4.200'
+
 
 }
 
 test {
     useJUnitPlatform()
+
 }
 
 bootBuildImage {

@@ -26,6 +26,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
     implementation 'junit:junit:4.13.1'
+    implementation 'dev.valora.commons:spring-hateoas-resources-assembler:1.1.0'
     compileOnly 'org.projectlombok:lombok'
     annotationProcessor 'org.projectlombok:lombok'
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -39,6 +40,11 @@ dependencies {
     // https://mvnrepository.com/artifact/com.h2database/h2
     implementation 'com.h2database:h2:1.4.200'
     annotationProcessor "org.springframework.boot:spring-boot-configuration-processor"
+    // https://mvnrepository.com/artifact/org.springframework.hateoas/spring-hateoas
+    implementation 'org.springframework.hateoas:spring-hateoas:1.4.1'
+    implementation 'org.springframework.data:spring-data-rest-webmvc:3.6.1'
+
+
 
 
 }

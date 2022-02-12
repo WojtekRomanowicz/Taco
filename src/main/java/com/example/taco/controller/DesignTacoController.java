@@ -1,90 +1,112 @@
 package com.example.taco.controller;
 
-import com.example.taco.domain.Ingredient;
 import com.example.taco.domain.Order;
 import com.example.taco.domain.Taco;
-import com.example.taco.repository.IngredientRepository;
-import com.example.taco.repository.JdbcIngredientRepository;
+import com.example.taco.repository.OrderRepository;
 import com.example.taco.repository.TacoRepository;
+import com.example.taco.resource.TacoResource;
+import com.example.taco.resource.TacoResourceAssembler;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Controller;
-import org.springframework.ui.Model;
+import org.springframework.dao.EmptyResultDataAccessException;
+import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.server.EntityLinks;
+import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.validation.Errors;
+import org.springframework.data.domain.Sort;
+import org.springframework.http.HttpStatus;
+import org.springframework.data.domain.PageRequest;
 
-
-import java.util.ArrayList;
-import java.util.stream.Collectors;
-import java.util.Arrays;
 import java.util.List;
-import com.example.taco.domain.Ingredient.Type;
+import java.util.Optional;
 
-import javax.validation.Valid;
+
 
 @Slf4j
-@Controller
-@RequestMapping("/design")
-@SessionAttributes("order")
+@RestController
+@RequestMapping(path="/design", produces="application/json")
+@CrossOrigin(origins="*")
 public class DesignTacoController {
 
-    private final IngredientRepository ingredientRepo;
-    private TacoRepository designRepo;
+    private TacoRepository tacoRepo;
+    private OrderRepository repo;
 
     @Autowired
-    public DesignTacoController(IngredientRepository ingredientRepo, TacoRepository designRepo) {
+    EntityLinks entityLinks;
 
-        this.ingredientRepo = ingredientRepo;
-        this.designRepo = designRepo;
+    @Autowired
+    public DesignTacoController(TacoRepository tacoRepo, OrderRepository repo) {
+
+        this.tacoRepo = tacoRepo;
+        this.repo = repo;
     }
 
-    @ModelAttribute(name = "order")
-    public Order order() {
-        return new Order();
+    @GetMapping("/recent")
+    public CollectionModel<TacoResource> recentTacos() {
+        PageRequest page = PageRequest.of(0, 12, Sort.by("createdAt").descending());
+        List<Taco> tacos = tacoRepo.findAll(page).getContent();
+        List<TacoResource> tacoResources = new TacoResourceAssembler().toCollectionModel(tacos);
+        CollectionModel<TacoResource> recentResources = CollectionModel.of(tacoResources);
+        recentResources.add(
+                WebMvcLinkBuilder.linkTo(DesignTacoController.class)
+                        .slash("recent")
+                        .withRel("recents"));
+        return recentResources;
     }
 
-    @ModelAttribute(name = "taco")
-    public Taco taco() {
-        return new Taco();
-    }
-
-    @GetMapping
-    public String showDesignForm(Model model)
-    {
-        List<Ingredient> ingredients = new ArrayList<>();
-        ingredientRepo.findAll().forEach(i -> ingredients.add(i));
-
-        Ingredient.Type[] types = Ingredient.Type.values();
-        for (Ingredient.Type type : types) {
-            model.addAttribute(type.toString().toLowerCase(),
-                    filterByType(ingredients, type));
-
+    @GetMapping("/{id}")
+    public ResponseEntity<Taco> tacoById(@PathVariable("id") Long id) {
+        Optional<Taco> optTaco = tacoRepo.findById(id);
+        if (optTaco.isPresent()) {
+            return new ResponseEntity<Taco>(optTaco.get(), HttpStatus.OK);
         }
-        model.addAttribute("design", new Taco());
-        return "design";
+        return new ResponseEntity<>(null, HttpStatus.NOT_FOUND);
     }
 
-    @PostMapping
-    public String processDesign(@Valid Taco design, Errors errors, @ModelAttribute Order order){
-        if (errors.hasErrors()) {
-            return "design";
+    @PostMapping(consumes="application/json")
+    @ResponseStatus(HttpStatus.CREATED)
+    public Taco postTaco(@RequestBody Taco taco) {
+        return tacoRepo.save(taco);
+    }
+
+    @PatchMapping(path="/{orderId}", consumes="application/json")
+    public Order patchOrder(@PathVariable("orderId") Long orderId,
+                            @RequestBody Order patch) {
+        Order order = repo.findById(orderId).get();
+        if (patch.getName() != null) {
+            order.setName(patch.getName());
         }
-
-        Taco saved = designRepo.save(design);
-        order.addDesign(saved);
-
-        log.info("Przetwarzanie projektu taco:" + design);
-        return "redirect:/orders/current";
+        if (patch.getStreet() != null) {
+            order.setStreet(patch.getStreet());
+        }
+        if (patch.getCity() != null) {
+            order.setCity(patch.getCity());
+        }
+        if (patch.getState() != null) {
+            order.setState(patch.getState());
+        }
+        if (patch.getZip() != null) {
+            order.setZip(patch.getState());
+        }
+        if (patch.getCcNumber() != null) {
+            order.setCcNumber(patch.getCcNumber());
+        }
+        if (patch.getCcExpiration() != null) {
+            order.setCcExpiration(patch.getCcExpiration());
+        }
+        if (patch.getCcCVV() != null) {
+            order.setCcCVV(patch.getCcCVV());
+        }
+        return repo.save(order);
     }
 
-    private List<Ingredient> filterByType(
-            List<Ingredient> ingredients, Type type) {
-        return ingredients
-                .stream()
-                .filter(x -> x.getType().equals(type))
-                .collect(Collectors.toList());
+    @DeleteMapping("/{orderId}")
+    @ResponseStatus(code=HttpStatus.NO_CONTENT)
+    public void deleteOrder(@PathVariable("orderId") Long orderId) {
+        try {
+            repo.deleteById(orderId);
+        } catch (EmptyResultDataAccessException e) {}
     }
-
-
 
 }

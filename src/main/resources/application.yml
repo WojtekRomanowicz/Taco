@@ -1,0 +1,17 @@
+server:
+port: 8443
+ssl:
+key-store: file:C:\Users\Admin\mykeys.jks
+key-store-password: letmein
+key-password: letmein
+
+logging:
+path: /var/logs/
+file: TacoCloud.log
+level:
+root: WARN
+org.springframework.security: DEBUG
+
+taco:
+orders:
+pageSize: 10

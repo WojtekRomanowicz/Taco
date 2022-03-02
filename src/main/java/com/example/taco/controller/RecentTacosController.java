@@ -8,12 +8,15 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.rest.webmvc.RepositoryRestController;
 import org.springframework.hateoas.CollectionModel;
+import org.springframework.hateoas.MediaTypes;
+import org.springframework.hateoas.client.Traverson;
 import org.springframework.hateoas.server.mvc.WebMvcLinkBuilder;
 import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 
+import java.net.URI;
 import java.util.List;
 
 import static org.springframework.hateoas.server.mvc.WebMvcLinkBuilder.methodOn;
@@ -24,6 +27,10 @@ public class RecentTacosController {
     public RecentTacosController(TacoRepository tacoRepo) {
         this.tacoRepo = tacoRepo;
     }
+
+    Traverson traverson = new Traverson(URI.create(
+            "http://localhost:8080/api"), MediaTypes.HAL_JSON);
+
     @GetMapping(path="/tacos/recent", produces="application/hal+json")
     @ResponseStatus(HttpStatus.OK)
     public CollectionModel<TacoResource> recentTacos() {

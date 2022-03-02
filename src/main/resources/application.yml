@@ -15,3 +15,8 @@ org.springframework.security: DEBUG
 taco:
 orders:
 pageSize: 10
+
+spring:
+jms:
+template:
+default-destination: tacocloud.order.queue

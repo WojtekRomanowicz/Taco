@@ -44,6 +44,11 @@ dependencies {
     implementation 'org.springframework.hateoas:spring-hateoas:1.4.1'
     implementation 'org.springframework.data:spring-data-rest-webmvc:3.6.1'
     implementation 'org.springframework.boot:spring-boot-starter-artemis'
+    // https://mvnrepository.com/artifact/org.springframework.boot/spring-boot-starter-amqp
+    implementation 'org.springframework.boot:spring-boot-starter-amqp:2.6.3'
+// https://mvnrepository.com/artifact/org.springframework.kafka/spring-kafka
+    implementation 'org.springframework.kafka:spring-kafka:2.8.3'
+
 
 
 
